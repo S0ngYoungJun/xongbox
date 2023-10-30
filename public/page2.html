@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    *{margin:0; padding:0; box-sizing: border-box;
+      }
+    #root {
+      width: 100vw;
+      display: flex;
+      height: 100vh;
+      flex-wrap:wrap;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #root>div:nth-child(1){
+      background-color: bisque;
+      width:60vw;
+      height:95vh;
+      position: relative;
+    }
+    #root>div:nth-child(2){
+      background-color:#F9F9F9;
+      width:15vw;
+      height:10vh;
+      display:flex;
+      text-align: center;
+      font-size: 1.5vw;
+      justify-content: center;
+      align-items: center;
+    }
+    #root>div:nth-child(3){
+      background-color: #F9F9F9;
+      width:15vw;
+      height:10vh;
+      margin-top:30px;
+      display:flex;
+      text-align: center;
+      font-size: 2vw;
+      justify-content: center;
+      align-items: center;
+    }
+    #root>div:nth-child(4){
+      background-color: #F9F9F9;
+      width:15vw;
+      height:10vh;
+      margin-top:30px;
+      display:flex;
+      text-align: center;
+      font-size: 2vw;
+      justify-content: center;
+      align-items: center;
+    }
+    #root>button{
+      background-color: #FF6666;
+      width:15vw;
+      height:15vw;
+      margin-top:20px;
+      border-radius: 30px;
+      font-size: 4vw;
+      font-weight: 800;
+    }
+    
+    
+    
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div id="board"></div>
+    <div>하이스코어:<span id="high">0</span></div>
+    <div>시간:<span id="log">0</span></div>
+    <div>스코어:<span id=value>0</span></div>
+    <button id="play">play!</button>
+  </div>
+  <script>
+    let count=0;
+    const root = document.getElementById('root');
+    const board = document.getElementById('board');
+    const play= document.getElementById('play');
+    let value = document.getElementById("value");
+    let log =document.getElementById("log");
+    const high = document.getElementById("high")
+    let highscore = parseInt(high.textContent)
+    console.dir(root);
+    
+
+    //주요 클릭 이벤트//
+    play.addEventListener("click",function(e){
+      const oldTime = Date.now();
+      let interval = setInterval(function(){
+      const newDiv = document.createElement('button')
+      newDiv.setAttribute("id", "btn")
+      newDiv.style.width = "2vw"
+      newDiv.style.height = "2vw"
+      newDiv.style.backgroundColor = "red"
+      newDiv.style.borderRadius = "20px"
+      newDiv.style.position="absolute"
+      let x = Math.floor(Math.random()* 58) 
+      let y = Math.floor(Math.random()* 93) 
+      let xString = x.toString()
+      let ySting = y.toString()
+      newDiv.style.left = xString+"vw"
+      newDiv.style.top = ySting+"vh"
+      board.appendChild(newDiv)
+
+
+      newDiv.addEventListener("click",function(eventTarget){
+      newDiv.remove()
+      count = parseInt(count) + 1
+      value.textContent = count
+      
+    })
+    },500)
+    let time = setInterval(function(){
+      const currentTime = Date.now();
+        // 경과한 밀리초 가져오기
+        const diff = currentTime - oldTime;
+    
+        // 초(second) 단위 변환하기
+    
+        const sec = Math.floor(diff / 1000);
+    
+        // HTML에 문자열 넣기
+        log.innerHTML = `${sec}`;
+      
+      
+      
+      if(sec>9){
+        clearInterval(interval)
+        clearInterval(time)
+        while ( board.hasChildNodes() )
+        {
+        board.removeChild( board.firstChild );       
+        }
+        console.log(value.textContent)
+        if(highscore<parseInt(value.textContent)){
+          high.textContent=parseInt(value.textContent)
+        }
+        // alert("끝!!!!")
+        // re()
+        count = 0
+        log.innerHTML = 0
+        value.textContent = 0
+      }
+
+    },1000)
+    function re(){
+            
+            location.reload()
+            event.stopPropagation()
+            }
+
+
+    })
+    
+
+  </script>
+</body>
+</html>
