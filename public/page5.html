@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+.bingo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+.bingo-boards {
+    display: flex;
+    width: 100vw;
+    height:60vh;
+    justify-content: space-around
+}
+
+.left-board {
+    width: 30vw;
+    height: 60vh;
+    display: grid;
+    grid-template-columns: repeat(5, 12vh);
+    grid-template-rows: repeat(5, 6vw);
+    background-color: lavender; /* 왼쪽 빙고판의 배경색을 연한 보라색으로 지정 */
+}
+
+.right-board {
+  width: 30vw;
+    height: 60vh;
+    display: grid;
+    grid-template-columns: repeat(5, 12vh);
+    grid-template-rows: repeat(5, 6vw);
+    background-color: lightpink; /* 오른쪽 빙고판의 배경색을 연한 핑크색으로 지정 */
+}
+
+.left-board div {
+    border: 1px solid #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.right-board div {
+    border: 1px solid #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.game-controls {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#winner-box {
+    margin-top: 20px;
+    font-size: 24px;
+}
+  </style>
+</head>
+<body>
+  <div class="bingo-container">
+    <div class="bingo-boards">
+        <div class="bingo-board left-board" id="left-board"></div>
+        <div class="bingo-board right-board" id="right-board"></div>
+    </div>
+    <div class="game-controls">
+        <button id="start-button">게임 시작</button>
+        <div id="timer">제한 시간: 10초</div>
+    </div>
+    <div class="winner-box" id="winner-box">승리자: </div>
+</div>
+<script>
+const leftBoard = document.getElementById('left-board');
+const rightBoard = document.getElementById('right-board');
+
+let leftSelectedNumbers = new Set();
+let rightSelectedNumbers = new Set();
+let currentPlayer = '플레이어';
+
+// Function to generate random numbers for the bingo boards
+function generateRandomNumbers() {
+    const numbers = Array.from({ length: 25 }, (_, index) => index + 1);
+    for (let i = numbers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+    }
+    return numbers;
+}
+
+// Function to populate the bingo board with numbers
+function populateBoard(board, selectedNumbers) {
+    const numbers = generateRandomNumbers();
+    for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.textContent = numbers[i];
+        if (selectedNumbers.has(numbers[i])) {
+            cell.style.backgroundColor = 'lightblue';
+        }
+        board.appendChild(cell);
+    }
+}
+
+// Function to handle cell click events
+function handleCellClick(event) {
+    if (currentPlayer === '플레이어') {
+        const selectedNumbers = leftSelectedNumbers;
+        if (!selectedNumbers.has(Number(event.target.textContent))) {
+            event.target.style.backgroundColor = 'lightblue';
+            selectedNumbers.add(Number(event.target.textContent));
+            if (checkBingo(selectedNumbers)) {
+                document.getElementById('winner-box').textContent = '승리자: 플레이어';
+                endGame();
+            } else {
+                currentPlayer = '컴퓨터';
+                setTimeout(computerTurn, 1000);
+            }
+        }
+    }
+}
+
+// Add click event listeners to the cells
+leftBoard.addEventListener('click', handleCellClick);
+rightBoard.addEventListener('click', handleCellClick);
+
+// Function to check for a bingo
+function checkBingo(selectedNumbers) {
+    // 승리 조건을 3줄 빙고로 변경
+    const rows = [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24]];
+    const columns = [[0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24]];
+    const diagonals = [[0, 6, 12, 18, 24], [4, 8, 12, 16, 20]];
+
+    for (const row of rows) {
+        if (row.every((cell) => selectedNumbers.has(cell))) {
+            return true;
+        }
+    }
+
+    for (const col of columns) {
+        if (col.every((cell) => selectedNumbers.has(cell))) {
+            return true;
+        }
+    }
+
+    for (const diagonal of diagonals) {
+        if (diagonal.every((cell) => selectedNumbers.has(cell))) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Computer's turn
+function computerTurn() {
+    if (currentPlayer === '컴퓨터') {
+        if (rightSelectedNumbers.size >= 25) {
+            return; // All numbers are already selected
+        }
+
+        let randomNumber;
+        do {
+            randomNumber = generateRandomNumbers()[0]; // Select the first available number
+        } while (rightSelectedNumbers.has(randomNumber));
+
+        const cell = rightBoard.querySelector(`div:contains("${randomNumber}")`);
+        cell.style.backgroundColor = 'lightblue';
+        rightSelectedNumbers.add(randomNumber);
+
+        if (checkBingo(rightSelectedNumbers)) {
+            document.getElementById('winner-box').textContent = '승리자: 컴퓨터';
+            endGame();
+        } else {
+            currentPlayer = '플레이어';
+        }
+    }
+}
+
+// Function to end the game and disable cell clicks
+function endGame() {
+    leftBoard.removeEventListener('click', handleCellClick);
+    rightBoard.removeEventListener('click', handleCellClick);
+}
+
+// Function to reset the boards and start a new game
+function resetBoards() {
+    leftBoard.innerHTML = '';
+    rightBoard.innerHTML = '';
+    leftSelectedNumbers = new Set();
+    rightSelectedNumbers = new Set();
+    populateBoard(leftBoard, leftSelectedNumbers);
+    populateBoard(rightBoard, rightSelectedNumbers);
+    currentPlayer = '플레이어';
+    document.getElementById('winner-box').textContent = '승리자: ';
+    leftBoard.addEventListener('click', handleCellClick);
+}
+
+// Add an event listener to the start button to initiate the game
+document.getElementById('start-button').addEventListener('click', resetBoards);
+
+// Initial board population
+populateBoard(leftBoard, leftSelectedNumbers);
+populateBoard(rightBoard, rightSelectedNumbers);
+
+</script>
+</body>
+</html>

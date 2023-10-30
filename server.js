@@ -9,9 +9,7 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
-app.get('/page1', (req, res) => {
-  res.sendFile(__dirname + '/public/page1.html');
-});
+
 
 
 app.listen(port, () => {
